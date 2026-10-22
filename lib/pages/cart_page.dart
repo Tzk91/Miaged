@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/activity.dart';
 import '../services/db.dart';
+import '../theme.dart';
 import '../widgets/activity_image.dart';
 import '../widgets/centered_body.dart';
 
@@ -16,7 +17,7 @@ class CartPage extends StatelessWidget {
     final cart = cartRef(login);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Panier')),
+      appBar: AppBar(title: const Text('Mon panier')),
       body: StreamBuilder(
         stream: cart.snapshots(),
         builder: (context, snapshot) {
@@ -39,8 +40,9 @@ class CartPage extends StatelessWidget {
             children: [
               Expanded(
                 child: CenteredBody(
+                  maxWidth: 720,
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     itemCount: items.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
@@ -71,7 +73,7 @@ class _CartItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final muted = theme.colorScheme.onSurfaceVariant;
 
     return Card(
       child: Padding(
@@ -79,8 +81,8 @@ class _CartItem extends StatelessWidget {
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: ActivityImage(activity.image, width: 76, height: 76),
+              borderRadius: BorderRadius.circular(16),
+              child: ActivityImage(activity.image, width: 88, height: 88),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -91,18 +93,14 @@ class _CartItem extends StatelessWidget {
                     activity.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
-                      Icon(
-                        Icons.place_outlined,
-                        size: 14,
-                        color: scheme.onSurfaceVariant,
-                      ),
+                      Icon(Icons.place_outlined, size: 14, color: muted),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -110,17 +108,17 @@ class _CartItem extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                            color: muted,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     activity.priceLabel,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: scheme.primary,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.coral,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -130,6 +128,10 @@ class _CartItem extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.close),
               tooltip: 'Retirer du panier',
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.sand,
+                foregroundColor: AppColors.ink,
+              ),
               onPressed: onRemove,
             ),
           ],
@@ -139,6 +141,7 @@ class _CartItem extends StatelessWidget {
   }
 }
 
+/// Total du panier, en bas de l'écran.
 class _TotalBar extends StatelessWidget {
   const _TotalBar({required this.count, required this.total});
 
@@ -148,16 +151,19 @@ class _TotalBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
-    return Material(
-      color: scheme.surfaceContainer,
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       child: SafeArea(
         top: false,
         child: CenteredBody(
+          maxWidth: 720,
           shrinkWrap: true,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
             child: Row(
               children: [
                 Column(
@@ -167,13 +173,14 @@ class _TotalBar extends StatelessWidget {
                     Text(
                       'Total',
                       style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       count > 1 ? '$count activités' : '$count activité',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -181,8 +188,8 @@ class _TotalBar extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '$total €',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: scheme.primary,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -201,7 +208,6 @@ class _EmptyCart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
 
     return Center(
       child: Padding(
@@ -209,19 +215,33 @@ class _EmptyCart extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.shopping_basket_outlined, size: 72, color: muted),
-            const SizedBox(height: 16),
-            Text(
-              'Votre panier est vide',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppColors.teal.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.shopping_basket_outlined,
+                size: 54,
+                color: AppColors.teal,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 20),
+            Text(
+              'Votre panier est vide',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6),
             Text(
               "Ajoutez des activités depuis l'onglet Activités",
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

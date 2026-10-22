@@ -8,11 +8,15 @@ import 'package:image_picker/image_picker.dart';
 import '../models/activity.dart';
 import '../services/db.dart';
 import '../services/image_classifier.dart';
+import '../theme.dart';
 import '../widgets/activity_image.dart';
+import '../widgets/bottom_bar.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/centered_body.dart';
+import '../widgets/section_card.dart';
 
-/// US#6 : ajout d'une activité ; la catégorie est déduite de l'image par l'IA (ML Kit).
+/// US#6 : ajout d'une activité ; la catégorie est déduite de l'image par l'IA
+/// (ML Kit sur Android, MobileNet sur le web).
 class AddActivityPage extends StatefulWidget {
   const AddActivityPage({super.key});
 
@@ -129,67 +133,63 @@ class _AddActivityPageState extends State<AddActivityPage> {
       appBar: AppBar(title: const Text('Nouvelle activité')),
       body: CenteredBody(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
             _ImagePickerTile(image: _image, onTap: busy ? null : _pickImage),
             const SizedBox(height: 20),
-            _AiCategoryCard(
-              controller: _category,
-              analyzing: _analyzing,
-            ),
+            _AiCategoryCard(controller: _category, analyzing: _analyzing),
             const SizedBox(height: 20),
-            TextField(
-              controller: _title,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Titre',
-                prefixIcon: Icon(Icons.title),
-              ),
-            ),
-            gap,
-            TextField(
-              controller: _location,
-              decoration: const InputDecoration(
-                labelText: 'Lieu',
-                prefixIcon: Icon(Icons.place_outlined),
-              ),
-            ),
-            gap,
-            TextField(
-              controller: _maxPeople,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Nombre de personnes maximum',
-                prefixIcon: Icon(Icons.group_outlined),
-              ),
-            ),
-            gap,
-            TextField(
-              controller: _price,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Prix (€)',
-                prefixIcon: Icon(Icons.euro),
-              ),
+            SectionCard(
+              title: 'Informations',
+              children: [
+                TextField(
+                  controller: _title,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    labelText: 'Titre',
+                    prefixIcon: Icon(Icons.title),
+                  ),
+                ),
+                gap,
+                TextField(
+                  controller: _location,
+                  decoration: const InputDecoration(
+                    labelText: 'Lieu',
+                    prefixIcon: Icon(Icons.place_outlined),
+                  ),
+                ),
+                gap,
+                TextField(
+                  controller: _maxPeople,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre de personnes maximum',
+                    prefixIcon: Icon(Icons.group_outlined),
+                  ),
+                ),
+                gap,
+                TextField(
+                  controller: _price,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(
+                    labelText: 'Prix (€)',
+                    prefixIcon: Icon(Icons.euro),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: CenteredBody(
-          shrinkWrap: true,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: busy ? null : _save,
-                icon: const Icon(Icons.check),
-                label: const Text('Valider'),
-              ),
-            ),
+      bottomNavigationBar: BottomBar(
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: busy ? null : _save,
+            icon: const Icon(Icons.check),
+            label: const Text('Valider'),
           ),
         ),
       ),
@@ -212,8 +212,14 @@ class _ImagePickerTile extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Material(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.teal.withValues(alpha: 0.07),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: AppColors.teal.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -221,15 +227,31 @@ class _ImagePickerTile extends StatelessWidget {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.add_a_photo_outlined,
-                      size: 44,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: cardShadow,
+                      ),
+                      child: const Icon(
+                        Icons.add_a_photo_outlined,
+                        size: 30,
+                        color: AppColors.teal,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       'Choisir une image',
-                      style: theme.textTheme.titleSmall,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "L'IA en déduira la catégorie",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 )
@@ -256,10 +278,7 @@ class _ImagePickerTile extends StatelessWidget {
 
 /// Bloc IA : catégorie détectée automatiquement (champ non éditable).
 class _AiCategoryCard extends StatelessWidget {
-  const _AiCategoryCard({
-    required this.controller,
-    required this.analyzing,
-  });
+  const _AiCategoryCard({required this.controller, required this.analyzing});
 
   final TextEditingController controller;
   final bool analyzing;
@@ -267,10 +286,10 @@ class _AiCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final muted = theme.textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
+      color: theme.colorScheme.onSurfaceVariant,
     );
+    final category = controller.text;
 
     return Card(
       child: Padding(
@@ -280,8 +299,19 @@ class _AiCategoryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.auto_awesome, color: scheme.tertiary),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   "Catégorie détectée par l'IA",
                   style: theme.textTheme.titleSmall?.copyWith(
@@ -290,13 +320,16 @@ class _AiCategoryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             TextField(
               controller: controller,
               readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Catégorie',
-                prefixIcon: Icon(categoryIcon(controller.text)),
+                prefixIcon: Icon(
+                  categoryIcon(category),
+                  color: category.isEmpty ? null : categoryColor(category),
+                ),
               ),
             ),
             if (analyzing) ...[
@@ -310,13 +343,13 @@ class _AiCategoryCard extends StatelessWidget {
                     : "Analyse de l'image…",
                 style: muted,
               ),
-            ] else if (controller.text.isEmpty)
+            ] else if (category.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   kIsWeb
-                      ? "Choisis une image : l'IA (MobileNet, TensorFlow.js) en déduit la catégorie."
-                      : "Choisis une image : l'IA (ML Kit) en déduit la catégorie.",
+                      ? "Choisissez une image : l'IA (MobileNet, TensorFlow.js) en déduit la catégorie."
+                      : "Choisissez une image : l'IA (ML Kit) en déduit la catégorie.",
                   style: muted,
                 ),
               ),

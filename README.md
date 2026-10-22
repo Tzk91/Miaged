@@ -59,11 +59,13 @@ Sur un émulateur Android, il suffit de glisser une image sur la fenêtre de l'�
 
 ## Design
 
-- Material 3, couleur sarcelle des maquettes du TP, accent orange pour les prix (`lib/theme.dart`), interface en français (calendrier, infobulles).
-- Liste en cartes photo avec catégorie et prix ; une colonne sur téléphone, plusieurs sur tablette.
-- Détail avec grande photo qui se replie au défilement, animée depuis la liste (Hero).
-- Badge du nombre d'activités sur l'onglet Panier, total en bas du panier, écran « panier vide ».
-- Profil avec avatar, calendrier pour l'anniversaire, password affichable à la demande.
+- **Charte** (`lib/theme.dart`) : sarcelle des maquettes du TP, bleu nuit pour les textes, corail pour les prix, fond sable, une couleur par catégorie ; police **Poppins** embarquée (`fonts/`, licence SIL OFL) ; Material 3, interface en français (calendrier, infobulles).
+- **Connexion** : en-tête en dégradé terminé par une vague, formulaire dans une carte qui le chevauche.
+- **Activités** : cartes photo avec titre et lieu sur un dégradé, catégorie et prix en pastilles ; une colonne sur téléphone, jusqu'à trois sur tablette ; les photos apparaissent en fondu.
+- **Détail** : grande photo qui se replie au défilement, animée depuis la liste (Hero), informations en tuiles, boutons fixés en bas.
+- **Panier** : badge du nombre d'activités sur l'onglet, total dans une barre sombre, écran « panier vide ».
+- **Profil** : carte d'en-tête avec l'initiale du login, champs regroupés par section, calendrier pour l'anniversaire, password affichable à la demande.
+- **Icône** de l'application (Android, icône adaptative comprise, et web) : soleil couchant sur la mer, aux couleurs de l'app.
 - Messages d'erreur et de confirmation en bas d'écran, indicateurs de chargement.
 
 ## Modèle de données (Firestore)
@@ -88,8 +90,9 @@ lib/
   services/web_classifier_web.dart   pont Dart → TensorFlow.js (version web)
   services/web_classifier_stub.dart  remplaçant hors web (ML Kit est utilisé)
   utils/date_format.dart             dates JJ/MM/AAAA
-  widgets/                           composants réutilisés (carte, image, catégorie, password, mise en page)
+  widgets/                           composants réutilisés (carte, image, catégorie, password, section, barre du bas, mise en page)
   pages/                             une page par écran (login, accueil, activités, détail, panier, profil, ajout)
+fonts/                               police Poppins (licence SIL OFL)
 web/ai_classifier.js                 chargement de MobileNet et classification dans le navigateur
 test/                                tests du modèle, de l'IA, des dates et de la page de login
 tool/setup.ps1                       installation complète (Flutter, Firebase, données de démo)

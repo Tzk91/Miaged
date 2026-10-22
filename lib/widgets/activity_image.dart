@@ -33,6 +33,7 @@ class ActivityImage extends StatelessWidget {
             height: height,
             fit: BoxFit.cover,
             errorBuilder: onError,
+            frameBuilder: _fadeIn,
           )
         : Image.memory(
             base64Decode(image),
@@ -43,3 +44,18 @@ class ActivityImage extends StatelessWidget {
           );
   }
 }
+
+/// Les photos téléchargées apparaissent en fondu ; celles déjà en cache, immédiatement.
+Widget _fadeIn(
+  BuildContext context,
+  Widget child,
+  int? frame,
+  bool wasSynchronouslyLoaded,
+) => wasSynchronouslyLoaded
+    ? child
+    : AnimatedOpacity(
+        opacity: frame == null ? 0 : 1,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+        child: child,
+      );

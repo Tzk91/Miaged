@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/db.dart';
+import '../theme.dart';
 import 'activities_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
@@ -31,38 +32,45 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       body: pages[_index],
-      bottomNavigationBar: StreamBuilder(
-        stream: _cart,
-        builder: (context, snapshot) {
-          final count = snapshot.data?.size ?? 0;
-          Widget cartIcon(IconData icon) => Badge(
-            isLabelVisible: count > 0,
-            label: Text('$count'),
-            child: Icon(icon),
-          );
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: barShadow,
+        ),
+        child: StreamBuilder(
+          stream: _cart,
+          builder: (context, snapshot) {
+            final count = snapshot.data?.size ?? 0;
+            Widget cartIcon(IconData icon) => Badge(
+              isLabelVisible: count > 0,
+              backgroundColor: AppColors.coral,
+              label: Text('$count'),
+              child: Icon(icon),
+            );
 
-          return BottomNavigationBar(
-            currentIndex: _index,
-            onTap: (index) => setState(() => _index = index),
-            items: [
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.local_activity_outlined),
-                activeIcon: Icon(Icons.local_activity),
-                label: 'Activités',
-              ),
-              BottomNavigationBarItem(
-                icon: cartIcon(Icons.shopping_basket_outlined),
-                activeIcon: cartIcon(Icons.shopping_basket),
-                label: 'Panier',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profil',
-              ),
-            ],
-          );
-        },
+            return BottomNavigationBar(
+              currentIndex: _index,
+              onTap: (index) => setState(() => _index = index),
+              items: [
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.local_activity_outlined),
+                  activeIcon: Icon(Icons.local_activity),
+                  label: 'Activités',
+                ),
+                BottomNavigationBarItem(
+                  icon: cartIcon(Icons.shopping_basket_outlined),
+                  activeIcon: cartIcon(Icons.shopping_basket),
+                  label: 'Panier',
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  activeIcon: Icon(Icons.person),
+                  label: 'Profil',
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

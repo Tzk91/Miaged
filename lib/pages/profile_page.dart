@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/db.dart';
+import '../theme.dart';
 import '../utils/date_format.dart';
 import '../widgets/centered_body.dart';
 import '../widgets/password_field.dart';
+import '../widgets/section_card.dart';
 import 'add_activity_page.dart';
 import 'login_page.dart';
 
@@ -126,10 +128,17 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text('Mon profil'),
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: scheme.onPrimary),
-            onPressed: _loading ? null : _save,
-            child: const Text('Valider'),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: _loading ? null : _save,
+              icon: const Icon(Icons.check, size: 18),
+              label: const Text('Valider'),
+            ),
           ),
         ],
       ),
@@ -137,38 +146,48 @@ class _ProfilePageState extends State<ProfilePage> {
           ? const Center(child: CircularProgressIndicator())
           : CenteredBody(
               child: ListView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
                 children: [
                   _ProfileHeader(login: widget.login),
                   const SizedBox(height: 24),
-                  TextFormField(
-                    initialValue: widget.login,
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Login',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
+                  SectionCard(
+                    title: 'Compte',
+                    children: [
+                      TextFormField(
+                        initialValue: widget.login,
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Login',
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                      ),
+                      gap,
+                      PasswordField(controller: _controllers['password']!),
+                    ],
                   ),
-                  gap,
-                  PasswordField(controller: _controllers['password']!),
-                  gap,
-                  _field(
-                    'birthday',
-                    'Anniversaire',
-                    Icons.cake_outlined,
-                    onTap: _pickBirthday,
+                  const SizedBox(height: 20),
+                  SectionCard(
+                    title: 'Informations personnelles',
+                    children: [
+                      _field(
+                        'birthday',
+                        'Anniversaire',
+                        Icons.cake_outlined,
+                        onTap: _pickBirthday,
+                      ),
+                      gap,
+                      _field('address', 'Adresse', Icons.home_outlined),
+                      gap,
+                      _field(
+                        'postalCode',
+                        'Code postal',
+                        Icons.markunread_mailbox_outlined,
+                        digitsOnly: true,
+                      ),
+                      gap,
+                      _field('city', 'Ville', Icons.location_city_outlined),
+                    ],
                   ),
-                  gap,
-                  _field('address', 'Adresse', Icons.home_outlined),
-                  gap,
-                  _field(
-                    'postalCode',
-                    'Code postal',
-                    Icons.markunread_mailbox_outlined,
-                    digitsOnly: true,
-                  ),
-                  gap,
-                  _field('city', 'Ville', Icons.location_city_outlined),
                   const SizedBox(height: 28),
                   FilledButton.icon(
                     onPressed: () => Navigator.of(context).push(
@@ -180,10 +199,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     label: const Text('Ajouter une activité'),
                   ),
                   const SizedBox(height: 12),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: scheme.error,
-                      foregroundColor: scheme.onError,
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: scheme.error,
+                      side: BorderSide(
+                        color: scheme.error.withValues(alpha: 0.4),
+                        width: 1.5,
+                      ),
                     ),
                     onPressed: _logout,
                     icon: const Icon(Icons.logout),
@@ -196,6 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
+/// Carte d'en-tête : initiale du login sur le dégradé de l'application.
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({required this.login});
 
@@ -205,28 +228,49 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
-          child: Text(
-            login.isEmpty ? '?' : login[0].toUpperCase(),
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w600,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: AppColors.gradient,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: cardShadow,
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: Colors.white,
+            child: Text(
+              login.isEmpty ? '?' : login[0].toUpperCase(),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: AppColors.teal,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          login,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  login,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  'Membre MIAGED',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

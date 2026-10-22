@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../models/activity.dart';
@@ -13,6 +15,9 @@ class ActivitiesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Contenu limité à 1200 px de large et centré sur grand écran.
+    final side = math.max(20.0, (MediaQuery.sizeOf(context).width - 1200) / 2);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Activités')),
       body: StreamBuilder(
@@ -33,12 +38,12 @@ class ActivitiesPage extends StatelessWidget {
 
           // Une colonne sur téléphone, plusieurs sur tablette.
           return GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(side, 8, side, 28),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 480,
-              mainAxisExtent: 280,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
+              maxCrossAxisExtent: 420,
+              mainAxisExtent: 270,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
             ),
             itemCount: activities.length,
             itemBuilder: (context, index) {

@@ -1,11 +1,11 @@
 {
-    "name": "miaged",
-    "short_name": "miaged",
+    "name": "MIAGED",
+    "short_name": "MIAGED",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F4EF",
+    "theme_color": "#0E8A82",
+    "description": "Inscription à des activités (TP2 MIAGE)",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
