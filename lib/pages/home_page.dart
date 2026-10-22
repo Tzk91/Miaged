@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/db.dart';
 import 'activities_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
@@ -17,6 +18,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _index = 0;
 
+  /// Panier suivi en temps réel pour afficher le nombre d'activités sur l'onglet.
+  late final _cart = cartRef(widget.login).snapshots();
+
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -27,14 +31,38 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       body: pages[_index],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (index) => setState(() => _index = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.local_activity), label: 'Activités'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_basket), label: 'Panier'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
+      bottomNavigationBar: StreamBuilder(
+        stream: _cart,
+        builder: (context, snapshot) {
+          final count = snapshot.data?.size ?? 0;
+          Widget cartIcon(IconData icon) => Badge(
+            isLabelVisible: count > 0,
+            label: Text('$count'),
+            child: Icon(icon),
+          );
+
+          return BottomNavigationBar(
+            currentIndex: _index,
+            onTap: (index) => setState(() => _index = index),
+            items: [
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.local_activity_outlined),
+                activeIcon: Icon(Icons.local_activity),
+                label: 'Activités',
+              ),
+              BottomNavigationBarItem(
+                icon: cartIcon(Icons.shopping_basket_outlined),
+                activeIcon: cartIcon(Icons.shopping_basket),
+                label: 'Panier',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: 'Profil',
+              ),
+            ],
+          );
+        },
       ),
     );
   }

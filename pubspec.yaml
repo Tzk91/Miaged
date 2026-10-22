@@ -38,6 +38,8 @@ dependencies:
   cloud_firestore: ^7.0.0
   image_picker: ^1.2.4
   google_mlkit_image_labeling: ^0.16.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

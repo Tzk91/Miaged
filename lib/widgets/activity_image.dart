@@ -20,13 +20,26 @@ class ActivityImage extends StatelessWidget {
     );
     if (image.isEmpty) return fallback;
 
-    Widget onError(BuildContext context, Object error, StackTrace? stackTrace) =>
-        fallback;
+    Widget onError(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    ) => fallback;
 
     return image.startsWith('http')
-        ? Image.network(image,
-            width: width, height: height, fit: BoxFit.cover, errorBuilder: onError)
-        : Image.memory(base64Decode(image),
-            width: width, height: height, fit: BoxFit.cover, errorBuilder: onError);
+        ? Image.network(
+            image,
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            errorBuilder: onError,
+          )
+        : Image.memory(
+            base64Decode(image),
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            errorBuilder: onError,
+          );
   }
 }

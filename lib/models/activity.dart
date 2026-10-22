@@ -12,14 +12,14 @@ class Activity {
   });
 
   factory Activity.fromMap(String id, Map<String, dynamic> data) => Activity(
-        id: id,
-        title: data['title'] as String? ?? '',
-        category: data['category'] as String? ?? '',
-        location: data['location'] as String? ?? '',
-        price: (data['price'] as num?)?.toInt() ?? 0,
-        maxPeople: (data['maxPeople'] as num?)?.toInt() ?? 0,
-        image: data['image'] as String? ?? '',
-      );
+    id: id,
+    title: data['title'] as String? ?? '',
+    category: data['category'] as String? ?? '',
+    location: data['location'] as String? ?? '',
+    price: (data['price'] as num?)?.toInt() ?? 0,
+    maxPeople: (data['maxPeople'] as num?)?.toInt() ?? 0,
+    image: data['image'] as String? ?? '',
+  );
 
   final String id;
   final String title;
@@ -37,11 +37,11 @@ class Activity {
   String get priceLabel => '$price €';
 
   Map<String, dynamic> toMap() => {
-        'title': title,
-        'category': category,
-        'location': location,
-        'price': price,
-        'maxPeople': maxPeople,
-        'image': image,
-      };
+    'title': title,
+    'category': category,
+    'location': location,
+    'price': price,
+    'maxPeople': maxPeople,
+    'image': image,
+  };
 }

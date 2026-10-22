@@ -29,13 +29,25 @@ Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Fi
 À l'ajout d'une activité (bouton « Ajouter une activité » du profil), la catégorie n'est pas saisie : elle est déduite de l'image avec **Google ML Kit Image Labeling** (`google_mlkit_image_labeling`).
 
 - Le modèle de base est embarqué dans l'application et s'exécute sur le téléphone : ni connexion, ni clé d'API, ni coût.
-- ML Kit renvoie des étiquettes (« Kayak », « Food », « Museum »…) avec un score de confiance. L'application garde celles au-dessus de 0,5, de la plus probable à la moins probable, et prend la catégorie de la première étiquette connue : **Sport, Shopping, Gastronomie, Culture, Nature**, sinon **Autre** (table dans `lib/services/image_classifier.dart`).
-- Les étiquettes détectées sont affichées dans la console (`ML Kit : …`).
-- ML Kit n'existe que sur Android/iOS : sur le web, la catégorie vaut toujours « Autre ».
+- ML Kit renvoie des étiquettes parmi ~400 (« Kayak », « Food », « Museum »…) avec une confiance de 0 à 1 ; l'application garde celles au-dessus de 0,5.
+- Chaque étiquette utile est rattachée à une catégorie : **Sport, Shopping, Gastronomie, Culture, Nature** (table dans `lib/services/image_classifier.dart`). Les étiquettes trop générales (« Sky », « Rock », « Plant »), présentes sur presque toutes les photos d'extérieur, sont ignorées.
+- La catégorie retenue est celle dont les étiquettes **cumulent la plus forte confiance** : une photo de repas reconnue « Food » + « Bread » l'emporte sur un « Statue » isolé en arrière-plan. Aucune étiquette reconnue → **Autre**.
+- Le formulaire affiche la catégorie (champ non éditable) **et les étiquettes reconnues avec leur pourcentage**, pour que l'utilisateur comprenne le choix de l'IA. Elles sont aussi écrites dans la console (`ML Kit : … → Sport`).
+- La règle de choix est testée unitairement (`test/activity_test.dart`).
+- ML Kit n'existe que sur Android/iOS : sur le web, la catégorie vaut toujours « Autre » (le formulaire l'indique).
 
 Images de test : les photos des activités de démo (liens dans `tool/seed.json`, Wikimedia Commons). Par exemple, le kayak donne « Sport », la socca « Gastronomie », le lac d'Allos « Nature ».
 
 Sur un émulateur Android, il suffit de glisser une image sur la fenêtre de l'émulateur pour l'ajouter à sa galerie.
+
+## Design
+
+- Material 3, couleur sarcelle des maquettes du TP, accent orange pour les prix (`lib/theme.dart`), interface en français (calendrier, infobulles).
+- Liste en cartes photo avec catégorie et prix ; une colonne sur téléphone, plusieurs sur tablette.
+- Détail avec grande photo qui se replie au défilement, animée depuis la liste (Hero).
+- Badge du nombre d'activités sur l'onglet Panier, total en bas du panier, écran « panier vide ».
+- Profil avec avatar, calendrier pour l'anniversaire, password affichable à la demande.
+- Messages d'erreur et de confirmation en bas d'écran, indicateurs de chargement.
 
 ## Modèle de données (Firestore)
 
@@ -51,13 +63,15 @@ activities/{id}                 title, category, location, price, maxPeople, ima
 
 ```
 lib/
-  main.dart                       initialisation Firebase, thème
+  main.dart                       initialisation Firebase, localisation
+  theme.dart                      thème de l'application
   models/activity.dart            modèle Activity (lecture/écriture Firestore)
   services/db.dart                références des collections Firestore
   services/image_classifier.dart  IA : ML Kit → catégorie
-  widgets/activity_image.dart     affichage d'une image (URL ou base64)
+  utils/date_format.dart          dates JJ/MM/AAAA
+  widgets/                        composants réutilisés (carte, image, catégorie, password, mise en page)
   pages/                          une page par écran (login, accueil, activités, détail, panier, profil, ajout)
-test/activity_test.dart           tests du modèle et du choix de catégorie
+test/                             tests du modèle, de l'IA, des dates et de la page de login
 tool/setup.ps1                    installation complète (Flutter, Firebase, données de démo)
 tool/seed.json                    données de démo : 2 utilisateurs, 8 activités
 firestore.rules                   règles de sécurité Firestore

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/activity.dart';
 import '../services/db.dart';
-import '../widgets/activity_image.dart';
+import '../widgets/activity_card.dart';
 import 'activity_detail_page.dart';
 
-/// US#2 : liste de toutes les activités, lue en temps réel dans Firestore.
+/// US#2 : toutes les activités, lues en temps réel dans Firestore.
 class ActivitiesPage extends StatelessWidget {
   const ActivitiesPage({super.key, required this.login});
 
@@ -31,26 +31,25 @@ class ActivitiesPage extends StatelessWidget {
             return const Center(child: Text('Aucune activité pour le moment'));
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8),
+          // Une colonne sur téléphone, plusieurs sur tablette.
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 480,
+              mainAxisExtent: 280,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
             itemCount: activities.length,
             itemBuilder: (context, index) {
               final activity = activities[index];
-              return Card(
-                child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: ActivityImage(activity.image, width: 56, height: 56),
+              return ActivityCard(
+                activity: activity,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ActivityDetailPage(activity: activity, login: login),
                   ),
-                  title: Text(activity.title),
-                  subtitle: Text(activity.location),
-                  trailing: Text(
-                    activity.priceLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => ActivityDetailPage(activity: activity, login: login),
-                  )),
                 ),
               );
             },

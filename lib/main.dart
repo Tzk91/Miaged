@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'firebase_options.dart';
 import 'pages/login_page.dart';
+import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,14 +19,13 @@ class MiagedApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MIAGED',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-        ),
-      ),
+      // Le bandeau « DEBUG » masquait le bouton « Valider » des barres de titre.
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(),
+      // Textes des composants Material (calendrier, infobulles…) en français.
+      locale: const Locale('fr'),
+      supportedLocales: const [Locale('fr')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: const LoginPage(),
     );
   }

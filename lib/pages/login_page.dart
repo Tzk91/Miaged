@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../services/db.dart';
+import '../widgets/centered_body.dart';
+import '../widgets/password_field.dart';
 import 'home_page.dart';
 
 /// US#1 : connexion avec un login/password stocké dans la collection `users`.
@@ -53,35 +55,75 @@ class _LoginPageState extends State<LoginPage> {
   void _fail(String message) {
     debugPrint(message);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('MIAGED')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TextField(
-            controller: _login,
-            decoration: const InputDecoration(labelText: 'Login'),
-            textInputAction: TextInputAction.next,
-          ),
-          TextField(
-            controller: _password,
-            decoration: const InputDecoration(labelText: 'Password'),
-            obscureText: true,
-            onSubmitted: (_) => _connect(),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: FilledButton(
-              onPressed: _loading ? null : _connect,
-              child: const Text('Se connecter'),
+      body: CenteredBody(
+        maxWidth: 440,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+          children: [
+            Center(
+              child: CircleAvatar(
+                radius: 44,
+                backgroundColor: scheme.primaryContainer,
+                child: Icon(
+                  Icons.local_activity_outlined,
+                  size: 44,
+                  color: scheme.onPrimaryContainer,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              'Bienvenue !',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Connecte-toi pour réserver tes activités',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 32),
+            TextField(
+              controller: _login,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Login',
+                prefixIcon: Icon(Icons.person_outline),
+              ),
+            ),
+            const SizedBox(height: 16),
+            PasswordField(
+              controller: _password,
+              onSubmitted: (_) => _connect(),
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: _loading ? null : _connect,
+              child: _loading
+                  ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  : const Text('Se connecter'),
+            ),
+          ],
+        ),
       ),
     );
   }
