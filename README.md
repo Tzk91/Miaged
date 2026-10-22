@@ -32,9 +32,19 @@ Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Fi
 - ML Kit renvoie des étiquettes parmi ~400 (« Kayak », « Food », « Museum »…) avec une confiance de 0 à 1 ; l'application garde celles au-dessus de 0,5.
 - Chaque étiquette utile est rattachée à une catégorie : **Sport, Shopping, Gastronomie, Culture, Nature** (table dans `lib/services/image_classifier.dart`). Les étiquettes trop générales (« Sky », « Rock », « Plant »), présentes sur presque toutes les photos d'extérieur, sont ignorées.
 - La catégorie retenue est celle dont les étiquettes **cumulent la plus forte confiance** : une photo de repas reconnue « Food » + « Bread » l'emporte sur un « Statue » isolé en arrière-plan. Aucune étiquette reconnue → **Autre**.
-- Le formulaire affiche la catégorie (champ non éditable) **et les étiquettes reconnues avec leur pourcentage**, pour que l'utilisateur comprenne le choix de l'IA. Elles sont aussi écrites dans la console (`ML Kit : … → Sport`).
+- La catégorie s'affiche dans un champ non éditable. Les étiquettes reconnues et leur confiance sont écrites dans la console (`ML Kit : … → Sport`, ou `MobileNet : …` sur le web), ce qui permet de vérifier le choix de l'IA.
 - La règle de choix est testée unitairement (`test/activity_test.dart`).
-- ML Kit n'existe que sur Android/iOS : sur le web, la catégorie vaut toujours « Autre » (le formulaire l'indique).
+
+**Version web.** ML Kit n'existe que sur Android/iOS ; dans le navigateur, l'application utilise **MobileNet via TensorFlow.js** (`web/ai_classifier.js`, appelé depuis Dart par `dart:js_interop` dans `lib/services/web_classifier_web.dart`). Le modèle (1 000 classes ImageNet) est téléchargé à la première analyse, puis gardé en mémoire. Les classes reconnues (« canoe », « palace », « dough »…) sont rattachées aux mêmes catégories par mots-clés, avec la même règle de cumul des confiances. Résultats mesurés sur les photos de démo :
+
+| Photo | MobileNet reconnaît | Catégorie |
+|-------|---------------------|-----------|
+| Kayak | canoe 61 %, paddle 34 % | Sport |
+| Plongée | scuba diver 67 %, snorkel 20 % | Sport |
+| Socca | dough 41 %, frying pan 33 % | Gastronomie |
+| Lac d'Allos | lakeside 54 %, valley 21 %, alp 16 % | Nature |
+| Musée Matisse | palace 76 %, monastery 13 % | Culture |
+| Sacs de courses | plastic bag 91 % | Shopping |
 
 Images de test : les photos des activités de démo (liens dans `tool/seed.json`, Wikimedia Commons). Par exemple, le kayak donne « Sport », la socca « Gastronomie », le lac d'Allos « Nature ».
 

@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 
+import 'web_classifier_stub.dart'
+    if (dart.library.js_interop) 'web_classifier_web.dart';
+
 /// Catégories proposées et étiquettes du modèle de base ML Kit qui y mènent
 /// (liste complète : https://developers.google.com/ml-kit/vision/image-labeling/label-map).
 /// Les étiquettes trop générales (« Sky », « Rock », « Plant »…), présentes sur
@@ -200,15 +203,190 @@ final _categoryOfLabel = {
     for (final label in entry.value) label: entry.key,
 };
 
-/// Résultat de l'analyse d'une image.
-class Classification {
-  const Classification(this.category, this.labels);
+/// Version web (MobileNet) : mots des classes ImageNet qui mènent à chaque catégorie.
+/// Une classe ImageNet est une liste de synonymes (« frying pan, frypan, skillet ») :
+/// on compare mot à mot, pour que « skillet » ne soit pas pris pour « ski ».
+/// L'ordre compte : « punching bag » relève du Sport avant le Shopping.
+const _imageNetKeywords = {
+  'Sport': {
+    'canoe',
+    'paddle',
+    'scuba',
+    'snorkel',
+    'ski',
+    'ballplayer',
+    'volleyball',
+    'basketball',
+    'soccer',
+    'rugby',
+    'football',
+    'tennis',
+    'golf',
+    'racket',
+    'puck',
+    'baseball',
+    'croquet',
+    'ping',
+    'dumbbell',
+    'barbell',
+    'punching',
+    'bicycle',
+    'bike',
+    'unicycle',
+    'helmet',
+    'bars',
+    'beam',
+    'swimming',
+    'kart',
+    'bobsled',
+    'snowmobile',
+  },
+  'Shopping': {
+    'shop',
+    'store',
+    'toyshop',
+    'bookshop',
+    'barbershop',
+    'boutique',
+    'market',
+    'basket',
+    'cart',
+    'bag',
+    'purse',
+    'wallet',
+    'backpack',
+    'sunglasses',
+    'jean',
+    'miniskirt',
+    'cardigan',
+    'suit',
+    'shoe',
+    'loafer',
+    'sandal',
+    'boot',
+    'necklace',
+    'lipstick',
+    'perfume',
+  },
+  'Gastronomie': {
+    'food',
+    'restaurant',
+    'bakery',
+    'menu',
+    'plate',
+    'dining',
+    'pizza',
+    'dough',
+    'bagel',
+    'pretzel',
+    'loaf',
+    'burrito',
+    'hotdog',
+    'cheeseburger',
+    'guacamole',
+    'carbonara',
+    'consomme',
+    'trifle',
+    'potpie',
+    'cream',
+    'espresso',
+    'coffee',
+    'cup',
+    'teapot',
+    'wine',
+    'beer',
+    'eggnog',
+    'skillet',
+    'frypan',
+    'wok',
+    'caldron',
+    'waffle',
+    'hotpot',
+    'soup',
+    'potato',
+    'broccoli',
+    'cauliflower',
+    'zucchini',
+    'cucumber',
+    'mushroom',
+    'strawberry',
+    'orange',
+    'lemon',
+    'banana',
+    'pineapple',
+    'pomegranate',
+    'fig',
+    'chocolate',
+    'confectionery',
+    'butcher',
+  },
+  'Culture': {
+    'palace',
+    'monastery',
+    'church',
+    'mosque',
+    'castle',
+    'library',
+    'cinema',
+    'theater',
+    'triumphal',
+    'obelisk',
+    'stupa',
+    'dome',
+    'altar',
+    'organ',
+    'piano',
+    'violin',
+    'cello',
+    'guitar',
+    'drum',
+    'accordion',
+    'harp',
+    'trombone',
+    'cornet',
+    'sax',
+    'banjo',
+    'flute',
+    'oboe',
+    'harmonica',
+    'book',
+    'comic',
+    'totem',
+    'planetarium',
+  },
+  'Nature': {
+    'lakeside',
+    'valley',
+    'alp',
+    'cliff',
+    'volcano',
+    'seashore',
+    'coast',
+    'coral',
+    'reef',
+    'geyser',
+    'promontory',
+    'sandbar',
+    'mountain',
+    'daisy',
+  },
+};
 
-  final String category;
-
-  /// Étiquettes reconnues par ML Kit avec leur confiance (0 à 1), de la plus sûre à la moins sûre.
-  final List<(String, double)> labels;
+String? _imageNetCategory(String className) {
+  final words = className.toLowerCase().split(RegExp('[^a-z]+')).toSet();
+  for (final entry in _imageNetKeywords.entries) {
+    if (entry.value.any(words.contains)) return entry.key;
+  }
+  return null;
 }
+
+/// Catégorie d'après les étiquettes ML Kit (Android/iOS).
+String categoryFor(List<(String, double)> labels) =>
+    _bestCategory(labels, (label) => _categoryOfLabel[label]);
+
+/// Catégorie d'après les classes ImageNet de MobileNet (web).
+String categoryForImageNet(List<(String, double)> labels) =>
+    _bestCategory(labels, _imageNetCategory);
 
 /// Choisit la catégorie dont les étiquettes reconnues cumulent la plus forte confiance,
 /// « Autre » si aucune étiquette ne correspond à une catégorie.
@@ -216,10 +394,13 @@ class Classification {
 /// Additionner les confiances rend le choix plus robuste qu'une seule étiquette :
 /// une photo de repas reconnue « Food », « Cuisine » et « Tableware » l'emporte
 /// sur un « Statue » isolé en arrière-plan.
-String categoryFor(List<(String, double)> labels) {
+String _bestCategory(
+  List<(String, double)> labels,
+  String? Function(String label) categoryOf,
+) {
   final scores = <String, double>{};
   for (final (label, confidence) in labels) {
-    final category = _categoryOfLabel[label];
+    final category = categoryOf(label);
     if (category != null) {
       scores[category] = (scores[category] ?? 0) + confidence;
     }
@@ -230,12 +411,28 @@ String categoryFor(List<(String, double)> labels) {
       .key;
 }
 
-/// Analyse une image avec ML Kit Image Labeling (modèle embarqué, exécuté sur le
-/// téléphone, sans connexion ni clé d'API) et en déduit sa catégorie.
-Future<Classification> classifyImage(String path) async {
-  // shortcut: ML Kit n'existe que sur Android/iOS ; sur le web la catégorie reste « Autre ».
-  if (kIsWeb) return const Classification('Autre', []);
+/// Analyse une image et en déduit sa catégorie :
+/// ML Kit sur Android/iOS (modèle embarqué, sans connexion ni clé d'API),
+/// MobileNet via TensorFlow.js dans le navigateur.
+/// Les étiquettes reconnues sont écrites dans la console.
+Future<String> classifyImage(String path, Uint8List bytes) =>
+    kIsWeb ? _classifyWithMobileNet(bytes) : _classifyWithMlKit(path);
 
+Future<String> _classifyWithMobileNet(Uint8List bytes) async {
+  // Les classes très peu probables (< 5 %) ne sont que du bruit.
+  final predictions = [
+    for (final prediction in await classifyOnWeb(bytes))
+      if (prediction.$2 >= 0.05) prediction,
+  ];
+  final category = categoryForImageNet(predictions);
+  debugPrint(
+    'MobileNet : ${predictions.map((p) => '${p.$1} ${p.$2.toStringAsFixed(2)}').join(' | ')}'
+    ' → $category',
+  );
+  return category;
+}
+
+Future<String> _classifyWithMlKit(String path) async {
   final labeler = ImageLabeler(
     options: ImageLabelerOptions(confidenceThreshold: 0.5),
   );
@@ -248,7 +445,7 @@ Future<Classification> classifyImage(String path) async {
       'ML Kit : ${labels.map((l) => '${l.$1} ${l.$2.toStringAsFixed(2)}').join(', ')}'
       ' → $category',
     );
-    return Classification(category, labels);
+    return category;
   } finally {
     await labeler.close();
   }

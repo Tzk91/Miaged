@@ -29,7 +29,6 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
   /// Image choisie, encodée en base64 pour être stockée dans le document Firestore.
   String? _image;
-  List<(String, double)> _labels = const [];
   bool _analyzing = false;
   bool _saving = false;
 
@@ -59,22 +58,20 @@ class _AddActivityPageState extends State<AddActivityPage> {
     if (!mounted) return;
     setState(() {
       _image = base64Encode(bytes);
-      _labels = const [];
       _category.clear();
       _analyzing = true;
     });
 
-    Classification result;
+    String category;
     try {
-      result = await classifyImage(file.path);
+      category = await classifyImage(file.path, bytes);
     } catch (e) {
       debugPrint('Classification impossible : $e');
-      result = const Classification('Autre', []);
+      category = 'Autre';
     }
     if (!mounted) return;
     setState(() {
-      _category.text = result.category;
-      _labels = result.labels;
+      _category.text = category;
       _analyzing = false;
     });
   }
@@ -139,7 +136,6 @@ class _AddActivityPageState extends State<AddActivityPage> {
             _AiCategoryCard(
               controller: _category,
               analyzing: _analyzing,
-              labels: _labels,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -258,17 +254,15 @@ class _ImagePickerTile extends StatelessWidget {
   }
 }
 
-/// Bloc IA : catégorie détectée (champ non éditable) et étiquettes reconnues par ML Kit.
+/// Bloc IA : catégorie détectée automatiquement (champ non éditable).
 class _AiCategoryCard extends StatelessWidget {
   const _AiCategoryCard({
     required this.controller,
     required this.analyzing,
-    required this.labels,
   });
 
   final TextEditingController controller;
   final bool analyzing;
-  final List<(String, double)> labels;
 
   @override
   Widget build(BuildContext context) {
@@ -309,30 +303,20 @@ class _AiCategoryCard extends StatelessWidget {
               const SizedBox(height: 12),
               const LinearProgressIndicator(),
               const SizedBox(height: 6),
-              Text("Analyse de l'image…", style: muted),
-            ] else if (labels.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text("Ce que l'IA a reconnu :", style: muted),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final (label, confidence) in labels.take(6))
-                    Chip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text('$label · ${(confidence * 100).round()} %'),
-                    ),
-                ],
+              Text(
+                kIsWeb
+                    ? "Analyse de l'image… (le premier chargement du modèle MobileNet "
+                          'prend quelques secondes)'
+                    : "Analyse de l'image…",
+                style: muted,
               ),
-            ] else
+            ] else if (controller.text.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   kIsWeb
-                      ? "L'IA (ML Kit) fonctionne sur Android et iOS : sur le web, "
-                            'la catégorie reste « Autre ».'
-                      : "Choisis une image : l'IA en déduit la catégorie.",
+                      ? "Choisis une image : l'IA (MobileNet, TensorFlow.js) en déduit la catégorie."
+                      : "Choisis une image : l'IA (ML Kit) en déduit la catégorie.",
                   style: muted,
                 ),
               ),

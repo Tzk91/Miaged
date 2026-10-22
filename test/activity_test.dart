@@ -53,4 +53,57 @@ void main() {
       expect(categoryFor([('Person', 0.9), ('Sky', 0.9)]), 'Autre');
     });
   });
+
+  // Résultats réels de MobileNet (TensorFlow.js) sur les photos de démo de tool/seed.json.
+  group('categoryForImageNet (IA web)', () {
+    test('kayak et plongée → Sport', () {
+      expect(
+        categoryForImageNet([('canoe', 0.61), ('paddle, boat paddle', 0.34)]),
+        'Sport',
+      );
+      expect(
+        categoryForImageNet([('scuba diver', 0.67), ('snorkel', 0.20)]),
+        'Sport',
+      );
+    });
+
+    test('socca → Gastronomie (« skillet » n\'est pas « ski »)', () {
+      final labels = [
+        ('dough', 0.41),
+        ('frying pan, frypan, skillet', 0.33),
+        ('bagel, beigel', 0.06),
+      ];
+      expect(categoryForImageNet(labels), 'Gastronomie');
+    });
+
+    test('lac d\'Allos → Nature malgré un château en arrière-plan', () {
+      final labels = [
+        ('lakeside, lakeshore', 0.54),
+        ('valley, vale', 0.21),
+        ('alp', 0.16),
+        ('castle', 0.04),
+      ];
+      expect(categoryForImageNet(labels), 'Nature');
+    });
+
+    test('musée → Culture, sacs et marché → Shopping', () {
+      expect(
+        categoryForImageNet([('palace', 0.76), ('monastery', 0.13)]),
+        'Culture',
+      );
+      expect(
+        categoryForImageNet([('plastic bag', 0.91), ('mountain tent', 0.03)]),
+        'Shopping',
+      );
+      final market = [
+        ('grocery store, grocery, food market, market', 0.20),
+        ('restaurant, eating house, eating place, eatery', 0.14),
+      ];
+      expect(categoryForImageNet(market), 'Shopping');
+    });
+
+    test('« Autre » si aucune classe connue', () {
+      expect(categoryForImageNet([('jellyfish', 0.8)]), 'Autre');
+    });
+  });
 }
