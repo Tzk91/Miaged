@@ -61,6 +61,8 @@ ThemeData buildAppTheme() {
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
+      // Même marge que le contenu des pages.
+      titleSpacing: 20,
       titleTextStyle: text.titleLarge?.copyWith(
         color: AppColors.ink,
         fontSize: 22,

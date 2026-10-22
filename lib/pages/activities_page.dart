@@ -19,7 +19,7 @@ class ActivitiesPage extends StatelessWidget {
     final side = math.max(20.0, (MediaQuery.sizeOf(context).width - 1200) / 2);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Activités')),
+      appBar: AppBar(titleSpacing: side, title: const Text('Activités')),
       body: StreamBuilder(
         stream: activitiesRef.snapshots(),
         builder: (context, snapshot) {

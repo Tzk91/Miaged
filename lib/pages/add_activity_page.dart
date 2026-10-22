@@ -164,7 +164,11 @@ class _AddActivityPageState extends State<AddActivityPage> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: const InputDecoration(
-                    labelText: 'Nombre de personnes maximum',
+                    // Libellé long : réduit plutôt que tronqué sur les petits écrans.
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Nombre de personnes maximum'),
+                    ),
                     prefixIcon: Icon(Icons.group_outlined),
                   ),
                 ),
