@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "19246863588",
+    "project_id": "miaged-9b647",
+    "storage_bucket": "miaged-9b647.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:19246863588:android:2a5f852a57a77c94eb88f1",
+        "android_client_info": {
+          "package_name": "fr.miage.miaged"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7rwzw1rKklA9n3JbhiaNes3pkoAVmmKE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

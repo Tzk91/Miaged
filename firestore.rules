@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Le TP demande une connexion « maison » (login/password dans la collection users)
+// sans Firebase Authentication : les règles ne peuvent donc pas identifier
+// l'utilisateur, et la base est ouverte en lecture/écriture.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

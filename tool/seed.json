@@ -1,0 +1,84 @@
+{
+  "users": {
+    "user1": {
+      "password": "password1",
+      "birthday": "12/12/1993",
+      "address": "Promenade des Anglais",
+      "postalCode": "06000",
+      "city": "Nice"
+    },
+    "user2": {
+      "password": "password2",
+      "birthday": "01/04/2000",
+      "address": "Avenue Jean Médecin",
+      "postalCode": "06000",
+      "city": "Nice"
+    }
+  },
+  "activities": {
+    "kayak-villefranche": {
+      "title": "Kayak de mer",
+      "category": "Sport",
+      "location": "Villefranche-sur-Mer",
+      "price": 35,
+      "maxPeople": 10,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Sea_kayak_Aquarius_Emotion.jpg/960px-Sea_kayak_Aquarius_Emotion.jpg"
+    },
+    "rando-mercantour": {
+      "title": "Randonnée au lac d'Allos",
+      "category": "Nature",
+      "location": "Parc du Mercantour",
+      "price": 20,
+      "maxPeople": 15,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Lac_d%27Allos_en_early_fall.jpg/960px-Lac_d%27Allos_en_early_fall.jpg"
+    },
+    "musee-matisse": {
+      "title": "Visite du musée Matisse",
+      "category": "Culture",
+      "location": "Nice, Cimiez",
+      "price": 12,
+      "maxPeople": 25,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Mus%C3%A9e_Matisse_Nice.JPG/960px-Mus%C3%A9e_Matisse_Nice.JPG"
+    },
+    "marche-saleya": {
+      "title": "Balade au marché aux fleurs",
+      "category": "Shopping",
+      "location": "Nice, cours Saleya",
+      "price": 15,
+      "maxPeople": 20,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/March%C3%A9_au_fleurs%2C_cours_Saleya.jpg/960px-March%C3%A9_au_fleurs%2C_cours_Saleya.jpg"
+    },
+    "atelier-socca": {
+      "title": "Atelier socca niçoise",
+      "category": "Gastronomie",
+      "location": "Nice, Vieux-Nice",
+      "price": 45,
+      "maxPeople": 8,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Socca_a_Nice.jpg/960px-Socca_a_Nice.jpg"
+    },
+    "plongee-antibes": {
+      "title": "Baptême de plongée",
+      "category": "Sport",
+      "location": "Antibes",
+      "price": 60,
+      "maxPeople": 6,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Scuba_Diver_-_Ahmad_Faiz_Mustafa.jpg/960px-Scuba_Diver_-_Ahmad_Faiz_Mustafa.jpg"
+    },
+    "opera-nice": {
+      "title": "Soirée à l'Opéra de Nice",
+      "category": "Culture",
+      "location": "Nice, Vieux-Nice",
+      "price": 40,
+      "maxPeople": 200,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Op%C3%A9ra_de_Nice_%28fa%C3%A7ade_nord%29.jpg/960px-Op%C3%A9ra_de_Nice_%28fa%C3%A7ade_nord%29.jpg"
+    },
+    "shopping-jean-medecin": {
+      "title": "Après-midi shopping",
+      "category": "Shopping",
+      "location": "Nice, avenue Jean Médecin",
+      "price": 25,
+      "maxPeople": 12,
+      "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Nice_-_Avenue_Jean_Medecin.jpg/960px-Nice_-_Avenue_Jean_Medecin.jpg"
+    }
+  }
+}
