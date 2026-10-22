@@ -1,6 +1,6 @@
 # MIAGED
 
-Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Firebase Cloud Firestore.
+Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Firebase Cloud Firestore. Elle fonctionne sur Android et dans le navigateur (Chrome).
 
 ## Utilisateurs de test
 
@@ -18,24 +18,33 @@ Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Fi
 | US#3 [MVP] Détail d'une activité | Réalisée |
 | US#4 [MVP] Le panier | Réalisée |
 | US#5 [MVP] Profil utilisateur | Réalisée |
-| US#6 Ajouter une nouvelle activité (IA) | Réalisée sur Android (voir ci-dessous) |
+| US#6 Ajouter une nouvelle activité (IA) | Réalisée (ML Kit sur Android, MobileNet sur le web) |
 
 - **Login** : le login est l'identifiant du document `users/{login}` ; le password est comparé à celui stocké. Champs vides ou utilisateur inconnu : message dans la console (`debugPrint`) et à l'écran, l'application reste utilisable.
 - **Activités / panier** : lus en temps réel (`snapshots()`), donc le panier et son total se mettent à jour dès qu'une activité est ajoutée ou retirée.
 - **Profil** : login en lecture seule, password masqué, code postal limité aux chiffres (clavier numérique). « Valider » enregistre en base, « Se déconnecter » revient au login.
+- **Ajout d'une activité** : depuis le profil ; image, titre, catégorie (non éditable, remplie par l'IA), lieu, nombre de personnes maximum et prix (chiffres uniquement). « Valider » enregistre en base.
 
 ## US#6 : catégorie détectée par l'IA
 
-À l'ajout d'une activité (bouton « Ajouter une activité » du profil), la catégorie n'est pas saisie : elle est déduite de l'image avec **Google ML Kit Image Labeling** (`google_mlkit_image_labeling`).
+À l'ajout d'une activité, la catégorie n'est pas saisie : dès que l'image est choisie, l'IA la reconnaît et la catégorie se remplit dans un champ non éditable. Deux moteurs sont utilisés selon la plateforme, avec la même règle de choix :
 
-- Le modèle de base est embarqué dans l'application et s'exécute sur le téléphone : ni connexion, ni clé d'API, ni coût.
-- ML Kit renvoie des étiquettes parmi ~400 (« Kayak », « Food », « Museum »…) avec une confiance de 0 à 1 ; l'application garde celles au-dessus de 0,5.
-- Chaque étiquette utile est rattachée à une catégorie : **Sport, Shopping, Gastronomie, Culture, Nature** (table dans `lib/services/image_classifier.dart`). Les étiquettes trop générales (« Sky », « Rock », « Plant »), présentes sur presque toutes les photos d'extérieur, sont ignorées.
+| Plateforme | Moteur | Fonctionnement |
+|------------|--------|----------------|
+| Android (téléphone, émulateur) | **Google ML Kit Image Labeling** (`google_mlkit_image_labeling`) | Modèle embarqué dans l'application, exécuté sur le téléphone : ni connexion, ni clé d'API, ni coût. ~400 étiquettes (« Kayak », « Food », « Museum »…), conservées au-dessus de 50 % de confiance. |
+| Web (Chrome) | **MobileNet via TensorFlow.js** | ML Kit n'existe pas sur le web. Le modèle (1 000 classes ImageNet : « canoe », « palace », « dough »…) est téléchargé à la première analyse puis gardé en mémoire (`web/ai_classifier.js`, appelé depuis Dart par `dart:js_interop`). |
+
+**Règle de choix** (`lib/services/image_classifier.dart`) :
+
+- Chaque étiquette utile est rattachée à une catégorie : **Sport, Shopping, Gastronomie, Culture, Nature**. Pour ML Kit, par une table d'étiquettes ; pour MobileNet, par mots-clés comparés mot à mot (« skillet » n'est pas pris pour « ski »).
+- Les étiquettes trop générales (« Sky », « Rock », « Plant »), présentes sur presque toutes les photos d'extérieur, sont ignorées.
 - La catégorie retenue est celle dont les étiquettes **cumulent la plus forte confiance** : une photo de repas reconnue « Food » + « Bread » l'emporte sur un « Statue » isolé en arrière-plan. Aucune étiquette reconnue → **Autre**.
-- La catégorie s'affiche dans un champ non éditable. Les étiquettes reconnues et leur confiance sont écrites dans la console (`ML Kit : … → Sport`, ou `MobileNet : …` sur le web), ce qui permet de vérifier le choix de l'IA.
-- La règle de choix est testée unitairement (`test/activity_test.dart`).
+- Les étiquettes reconnues et leur confiance sont écrites dans la console (`ML Kit : … → Sport`, ou `MobileNet : … → Sport` sur le web), ce qui permet de vérifier le choix de l'IA.
+- La règle est testée unitairement (`test/activity_test.dart`), y compris avec les résultats réels de MobileNet ci-dessous.
 
-**Version web.** ML Kit n'existe que sur Android/iOS ; dans le navigateur, l'application utilise **MobileNet via TensorFlow.js** (`web/ai_classifier.js`, appelé depuis Dart par `dart:js_interop` dans `lib/services/web_classifier_web.dart`). Le modèle (1 000 classes ImageNet) est téléchargé à la première analyse, puis gardé en mémoire. Les classes reconnues (« canoe », « palace », « dough »…) sont rattachées aux mêmes catégories par mots-clés, avec la même règle de cumul des confiances. Résultats mesurés sur les photos de démo :
+### Images utilisées pour tester l'IA
+
+Les photos des activités de démo (liens dans `tool/seed.json`, Wikimedia Commons), plus une photo de sacs de courses. Résultats mesurés avec MobileNet :
 
 | Photo | MobileNet reconnaît | Catégorie |
 |-------|---------------------|-----------|
@@ -46,9 +55,7 @@ Application Flutter d'inscription à des activités (TP2 – MIAGE IA2), avec Fi
 | Musée Matisse | palace 76 %, monastery 13 % | Culture |
 | Sacs de courses | plastic bag 91 % | Shopping |
 
-Images de test : les photos des activités de démo (liens dans `tool/seed.json`, Wikimedia Commons). Par exemple, le kayak donne « Sport », la socca « Gastronomie », le lac d'Allos « Nature ».
-
-Sur un émulateur Android, il suffit de glisser une image sur la fenêtre de l'émulateur pour l'ajouter à sa galerie.
+Sur un émulateur Android, il suffit de glisser une image sur la fenêtre de l'émulateur pour l'ajouter à sa galerie. Dans Chrome, « Choisir une image » ouvre l'explorateur de fichiers.
 
 ## Design
 
@@ -73,25 +80,29 @@ activities/{id}                 title, category, location, price, maxPeople, ima
 
 ```
 lib/
-  main.dart                       initialisation Firebase, localisation
-  theme.dart                      thème de l'application
-  models/activity.dart            modèle Activity (lecture/écriture Firestore)
-  services/db.dart                références des collections Firestore
-  services/image_classifier.dart  IA : ML Kit → catégorie
-  utils/date_format.dart          dates JJ/MM/AAAA
-  widgets/                        composants réutilisés (carte, image, catégorie, password, mise en page)
-  pages/                          une page par écran (login, accueil, activités, détail, panier, profil, ajout)
-test/                             tests du modèle, de l'IA, des dates et de la page de login
-tool/setup.ps1                    installation complète (Flutter, Firebase, données de démo)
-tool/seed.json                    données de démo : 2 utilisateurs, 8 activités
-firestore.rules                   règles de sécurité Firestore
+  main.dart                          initialisation Firebase, localisation
+  theme.dart                         thème de l'application
+  models/activity.dart               modèle Activity (lecture/écriture Firestore)
+  services/db.dart                   références des collections Firestore
+  services/image_classifier.dart     IA : choix du moteur et de la catégorie
+  services/web_classifier_web.dart   pont Dart → TensorFlow.js (version web)
+  services/web_classifier_stub.dart  remplaçant hors web (ML Kit est utilisé)
+  utils/date_format.dart             dates JJ/MM/AAAA
+  widgets/                           composants réutilisés (carte, image, catégorie, password, mise en page)
+  pages/                             une page par écran (login, accueil, activités, détail, panier, profil, ajout)
+web/ai_classifier.js                 chargement de MobileNet et classification dans le navigateur
+test/                                tests du modèle, de l'IA, des dates et de la page de login
+tool/setup.ps1                       installation complète (Flutter, Firebase, données de démo)
+tool/seed.json                       données de démo : 2 utilisateurs, 8 activités
+firestore.rules                      règles de sécurité Firestore
 ```
 
 ## Lancer l'application
 
 ```powershell
 flutter pub get
-flutter run -d chrome     # ou sur un émulateur / téléphone Android (nécessaire pour l'IA)
+flutter run -d chrome     # web : IA avec MobileNet
+flutter run               # émulateur ou téléphone Android : IA avec ML Kit
 flutter test
 ```
 
@@ -101,4 +112,4 @@ Pour recréer l'environnement Firebase de zéro sur un autre compte (nouveau pro
 ## Limites connues
 
 - Le TP impose une connexion « maison » sans Firebase Authentication. Les passwords sont donc stockés en clair, comme dans le modèle fourni, et les règles Firestore ne peuvent pas restreindre l'accès par utilisateur : la base est ouverte en lecture/écriture.
-- L'IA (US#6) ne fonctionne pas sur le web (ML Kit n'y est pas disponible).
+- Sur le web, l'IA a besoin d'Internet à la première analyse (téléchargement de TensorFlow.js et de MobileNet). Sur Android, ML Kit fonctionne hors ligne.
